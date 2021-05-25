@@ -17,8 +17,11 @@ build:
 	-t $(IMAGE) \
 	.
 
+docker-runin: build
+	docker run --rm --entrypoint /bin/bash -it $(IMAGE)
+
 dockerhub-push: build
-	docker push  $(IMAGE)
+	docker push $(IMAGE)
 
 run: build
 	docker run --rm  -p 5000:5000/tcp $(IMAGE)
