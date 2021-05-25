@@ -43,8 +43,11 @@ def fill(size=None):
     temp_name = next(tempfile._get_candidate_names())
     start_time = time.time()
     bs = os.environ['BS']
+    output_dir = os.environ['OUTPUT_DIRECTORY']
+    os.makedirs(output_dir, exist_ok=True)
+
     data = {'count': size, 'bs': bs,
-            'output': f'/tmp/{temp_name}', 'input': '/dev/urandom'}
+            'output': f'{output_dir}/{temp_name}', 'input': '/dev/urandom'}
 
     command = f"dd if={data['input']} bs={data['bs']} count={data['count']} of={data['output']}"
     print(command)

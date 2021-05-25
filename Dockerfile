@@ -10,6 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 ENV BS 1M
+ENV OUTPUT_DIRECTORY /tmp/fill
 
 # Install pip requirements
 COPY requirements.txt .
