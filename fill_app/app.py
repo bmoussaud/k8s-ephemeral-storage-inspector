@@ -3,7 +3,7 @@ from flask import Flask, render_template, jsonify
 import tempfile
 import time
 import os
-import subprocess 
+import subprocess
 
 app = Flask(__name__)    # Create an instance of the class for our use
 
@@ -42,7 +42,8 @@ def get_data():
 def fill(size=None):
     temp_name = next(tempfile._get_candidate_names())
     start_time = time.time()
-    data = {'count': size, 'bs': '1M',
+    bs = os.environ['BS']
+    data = {'count': size, 'bs': bs,
             'output': f'/tmp/{temp_name}', 'input': '/dev/urandom'}
 
     command = f"dd if={data['input']} bs={data['bs']} count={data['count']} of={data['output']}"
@@ -56,9 +57,9 @@ def fill(size=None):
     return jsonify(data)
 
 
-
 def run_dd(cmd):
     #dd = Popen(cmd.split(' '), stderr=PIPE)
-    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE,text=True)
-    out, err = p.communicate()      
+    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, text=True)
+    out, err = p.communicate()
     return err

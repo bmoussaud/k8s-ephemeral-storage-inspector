@@ -9,6 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+ENV BS 1M
+
 # Install pip requirements
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt

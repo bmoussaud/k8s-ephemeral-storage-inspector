@@ -24,4 +24,4 @@ dockerhub-push: build
 	docker push $(IMAGE)
 
 run: build
-	docker run --rm  -p 5000:5000/tcp $(IMAGE)
+	docker run --rm -e BS=10M -p 5000:5000/tcp $(IMAGE)
