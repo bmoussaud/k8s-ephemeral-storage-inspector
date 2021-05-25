@@ -55,8 +55,32 @@ def fill(size=None):
     stdout = run_dd(command)
     elapsed_time = time.time() - start_time
     data['elapsed_time'] = elapsed_time
-    data['stdout'] = str(stdout)
 
+    data['stdout'] = str(stdout).splitlines()
+    return jsonify(data)
+
+
+@app.route("/api/df")
+def dump(size=None):
+    bs = os.environ['BS']
+    output_dir = os.environ['OUTPUT_DIRECTORY']
+    os.makedirs(output_dir, exist_ok=True)
+
+    data = {'output_dir': output_dir}
+
+    command = f"df -h {output_dir}"
+    print(command)
+    data['command'] = command
+    stdout = run_df(command)
+
+    data['stdout_df'] = str(stdout).splitlines()
+
+    command = f"ls -lrth {output_dir}"
+    print(command)
+    data['command'] = command
+    stdout = run_ls(command)
+
+    data['stdout_ls'] = str(stdout).splitlines()
     return jsonify(data)
 
 
@@ -66,3 +90,15 @@ def run_dd(cmd):
                          stderr=subprocess.PIPE, text=True)
     out, err = p.communicate()
     return err
+
+
+def run_df(cmd):
+    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, text=True)
+    out, err = p.communicate()
+    return out
+
+
+def run_ls(cmd):
+    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, text=True)
+    out, err = p.communicate()
+    return out
