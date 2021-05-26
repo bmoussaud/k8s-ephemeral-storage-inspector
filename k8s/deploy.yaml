@@ -15,6 +15,7 @@ spec:
       labels:
         app: fill-storage
     spec:
+      serviceAccountName: fill-app-controller  
       containers:
       - name: fill-storage
         image: bmoussaud/fillstorage:0.0.1
@@ -26,6 +27,8 @@ spec:
             value: "512M"
           - name: OUTPUT_DIRECTORY
             value: "/tmp/filler"
+          - name: ENGINE
+            value: K8S
         volumeMounts:
           - mountPath: /tmp/filler
             name: runner

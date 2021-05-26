@@ -13,3 +13,13 @@
   on Linux/MacOS.
   4. In terminal, run `pip3 install flask`.
   5. From Run and Debug section, select `Python: Flask` launch configuration and hit F5.
+
+
+
+  1. Create namespace `filler` : `kubectl create ns filler`
+  2. Deploy `kubectl apply -f k8s -n filler`
+  3. Expose: `kubectl -n filler port-forward svc/fillapp-service 5000`
+  4. Actions
+
+  * Fill: curl http://localhost:5000/api/fill/5
+  

@@ -20,11 +20,21 @@ from urllib.parse import urlencode
 
 class VolumeManager:
     def __init__(self, config_file=None):
-        print("----------------- LOAD  K8S_API----------------------")
-        self._api = pykube.HTTPClient(
-            pykube.KubeConfig.from_file(config_file))
+        print(
+            f"----------------- LOAD  K8S_API {config_file} ----------------------")
 
-        config.load_kube_config(config_file=config_file)
+        if config_file == 'K8S':
+            print("k8s load_incluster_config")
+            config.load_incluster_config()
+            print("pykube from_service_account")
+            self._api = pykube.HTTPClient(
+                pykube.KubeConfig.from_service_account())
+        else:
+            print("load_external")
+            config.load_kube_config(config_file=config_file)
+            self._api = pykube.HTTPClient(
+                pykube.KubeConfig.from_file(config_file))
+
         self._core_v1 = core_v1_api.CoreV1Api()
 
     def k8s_api(self):
@@ -212,7 +222,11 @@ def run_ls(cmd):
 
 @app.route("/api/inspect")
 def inspect():
-    config_file = "kubeconfig-aws-front.yml"
+    if os.environ['ENGINE'] == 'K8S':
+        config_file = 'K8S'
+    else:
+        config_file = "kubeconfig-aws-front.yml"
+
     volumeManager = VolumeManager(config_file)
     data = volumeManager.run()
     return jsonify(data)
@@ -220,7 +234,11 @@ def inspect():
 
 @app.route("/inspect")
 def inspect_gui():
-    config_file = "kubeconfig-aws-front.yml"
+    if os.environ['ENGINE'] == 'K8S':
+        config_file = 'K8S'
+    else:
+        config_file = "kubeconfig-aws-front.yml"
+
     volumeManager = VolumeManager(config_file)
     json_data = volumeManager.run()
     table = json2html.convert(json=json_data)
