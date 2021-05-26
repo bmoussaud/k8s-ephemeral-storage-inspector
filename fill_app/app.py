@@ -1,6 +1,7 @@
+from json2html import *
 from flask import Flask
 from datetime import datetime
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, render_template_string
 import tempfile
 import time
 import os
@@ -215,3 +216,15 @@ def inspect():
     volumeManager = VolumeManager(config_file)
     data = volumeManager.run()
     return jsonify(data)
+
+
+@app.route("/inspect")
+def inspect_gui():
+    config_file = "kubeconfig-aws-front.yml"
+    volumeManager = VolumeManager(config_file)
+    json_data = volumeManager.run()
+    table = json2html.convert(json=json_data)
+    print(table)
+    return render_template_string(
+        table
+    )
