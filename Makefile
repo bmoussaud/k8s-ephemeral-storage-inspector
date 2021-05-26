@@ -25,3 +25,9 @@ dockerhub-push: build
 
 run: build
 	docker run --rm -e BS=10M -p 5000:5000/tcp $(IMAGE)
+
+apply:
+	kubectl apply -f k8s -n filler
+
+delete:
+	kubectl delete -f k8s -n filler

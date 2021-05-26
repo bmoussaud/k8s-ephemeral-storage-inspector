@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fillapp-deployment
+  labels:
+    app: fillstorage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fill-storage
+  template:
+    metadata:
+      labels:
+        app: fill-storage
+    spec:
+      containers:
+      - name: fill-storage
+        image: bmoussaud/fillstorage:0.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+          - name: BS
+            value: "512M"
+          - name: OUTPUT_DIRECTORY
+            value: "/tmp/filler"
+        volumeMounts:
+          - mountPath: /tmp/filler
+            name: runner
+      volumes:
+        - name: runner
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fillapp-service
+spec:
+  selector:
+    app: fill-storage
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+
+
