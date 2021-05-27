@@ -1,24 +1,73 @@
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:  
+  name:  storage-inspector-pod-manager
+rules:  
+  - apiGroups:
+      - ""
+      - "rbac.authorization.k8s.io"
+    resources:
+      - pods
+      - services
+      - services/finalizers
+      - serviceaccounts
+      - endpoints
+      - persistentvolumeclaims
+      - events
+      - configmaps
+      - secrets
+      - roles
+      - rolebindings
+    verbs:
+      - '*'
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    verbs:
+      - create
+      - get
+      - post
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: storage-inspector-controller    
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: storage-inspector-admin-binding
+subjects:
+  - kind: ServiceAccount
+    name: storage-inspector-controller   
+    namespace: inspector   
+roleRef:
+  kind: ClusterRole
+  name: storage-inspector-pod-manager
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fillapp-deployment
+  name: storage-inspector-deployment
   labels:
-    app: fillstorage
+    app: k8s-ephemeral-storage-inspector
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: fill-storage
+      app: k8s-ephemeral-storage-inspector
   template:
     metadata:
       labels:
-        app: fill-storage
+        app: k8s-ephemeral-storage-inspector
     spec:
-      serviceAccountName: fill-app-controller  
+      serviceAccountName: storage-inspector-controller  
       containers:
-      - name: fill-storage
-        image: bmoussaud/fillstorage:0.0.1
+      - name: k8s-ephemeral-storage-inspector
+        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
@@ -39,10 +88,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: fillapp-service
+  name: storage-inspector-svc
 spec:
   selector:
-    app: fill-storage
+    app: k8s-ephemeral-storage-inspector
   ports:
     - protocol: TCP
       port: 5000

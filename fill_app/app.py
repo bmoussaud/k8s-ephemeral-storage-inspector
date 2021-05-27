@@ -60,13 +60,14 @@ class VolumeManager:
             results = self.containers_using(
                 pod.obj['spec']['containers'], emptyDir)
             for v in results:
-                data = {'pod': pod.obj['metadata']['name'], 'container': v, 'pyobj': pod,
+                data = {'pod': pod.obj['metadata']['name'], 'container': v,
                         'path': results[v], 'namespace': pod.obj['metadata']['namespace'], 'nodeName': pod.obj['spec']['nodeName']}
                 pods_with_empty_dir_mounted_volumes.append(data)
 
         # pprint.pprint(pods_with_empty_dir_mounted_volumes)
         for pod in pods_with_empty_dir_mounted_volumes:
-            pod['command'] = "df {path}".format(**pod)
+            pod['command'] = "df -h {path}".format(**pod)
+            pod['command_file'] = "ls -lh {path}".format(**pod)
             pod['kubectl'] = "kubectl exec {pod} -n {namespace} -- {command}".format(
                 **pod)
 
@@ -77,28 +78,35 @@ class VolumeManager:
     def execute(self, pods):
         mesured_pods = []
         for pod in pods:
-            pyobj = pod['pyobj']
+            data_storage = {'storage-Filesystem': 'NA', 'storage-1K-blocks': 'NA', 'storage-Used': 'NA',
+                            'storage-Available': 'NA', 'storage-used_percent': 'NA', 'storage-mounted': 'NA', 'storage-ls': 'NA'}
             print("execute {pod}...{command}".format(**pod))
-            exec_command = pod['command'].split()
 
+            # DF
             resp = stream(self._core_v1.connect_get_namespaced_pod_exec,
                           pod['pod'],
                           pod['namespace'],
-                          command=exec_command,
+                          command=pod['command'].split(),
                           stderr=True, stdin=False,
                           stdout=True, tty=False)
+            print("Response: " + resp)
             data = resp.splitlines()
             if (len(data) > 0):
                 print("Response: " + data[1])
                 info = data[1].split()
+
+                resp_ls = stream(self._core_v1.connect_get_namespaced_pod_exec,
+                                 pod['pod'],
+                                 pod['namespace'],
+                                 command=pod['command_file'].split(),
+                                 stderr=True, stdin=False,
+                                 stdout=True, tty=False)
                 data_storage = {'storage-Filesystem': info[0], 'storage-1K-blocks': info[1], 'storage-Used': info[2],
-                                'storage-Available': info[3], 'storage-used_percent': info[4], 'storage-mounted': info[5]}
-            else:
-                print("Response: " + resp)
-                data_storage = {'storage-Filesystem': 'NA', 'storage-1K-blocks': 'NA', 'storage-Used': 'NA',
-                                'storage-Available': 'NA', 'storage-used_percent': 'NA', 'storage-mounted': 'NA'}
+                                'storage-Available': info[3], 'storage-used_percent': info[4], 'storage-mounted': info[5], 'storage-ls': resp_ls.splitlines()}
+
             pod.update(data_storage)
-            del pod['pyobj']
+            del pod['command']
+            del pod['command_file']
             mesured_pods.append(pod)
         return mesured_pods
 

@@ -1,4 +1,4 @@
-IMAGE_NAME=bmoussaud/fillstorage
+IMAGE_NAME=bmoussaud/k8s-ephemeral-storage-inspector
 IMAGE_VERSION=0.0.1
 IMAGE=$(IMAGE_NAME):$(IMAGE_VERSION)
 SOURCE_BRANCH=v0.0.1
@@ -27,7 +27,7 @@ run: build
 	docker run --rm -e BS=10M  -e ENGINE=LOCAL -p 5000:5000/tcp $(IMAGE)
 
 apply:
-	kubectl apply -f k8s -n filler
+	kubectl apply -f k8s -n inspector
 
 delete:
-	kubectl delete -f k8s -n filler
+	kubectl delete -f k8s -n inspector
