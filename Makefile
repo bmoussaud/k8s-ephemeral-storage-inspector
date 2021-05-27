@@ -1,5 +1,5 @@
 IMAGE_NAME=bmoussaud/k8s-ephemeral-storage-inspector
-IMAGE_VERSION=0.0.1
+IMAGE_VERSION=0.0.2
 IMAGE=$(IMAGE_NAME):$(IMAGE_VERSION)
 SOURCE_BRANCH=v0.0.1
 

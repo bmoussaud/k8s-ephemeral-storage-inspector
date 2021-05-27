@@ -55,8 +55,6 @@ class VolumeManager:
             if emptyDir is None:
                 continue
 
-            v = self.containers_using(pod.obj['spec']['containers'], emptyDir)
-
             results = self.containers_using(
                 pod.obj['spec']['containers'], emptyDir)
             for v in results:
@@ -117,10 +115,11 @@ class VolumeManager:
         return None
 
     def containers_using(self, containers, volume):
+        # print('containers_using')
         mountedVolumePaths = {}
         for container in containers:
             # pprint.pprint(containers)
-            volumeMounts = container['volumeMounts']
+            volumeMounts = container.get('volumeMounts', [])            
             for mountedVolume in volumeMounts:
                 if mountedVolume['name'] == volume['name']:
                     # print(mountedVolume)
@@ -250,7 +249,7 @@ def inspect_gui():
     volumeManager = VolumeManager(config_file)
     json_data = volumeManager.run()
     table = json2html.convert(json=json_data)
-    print(table)
+    # print(table)
     # return render_template_string(
     #    table
     # )
