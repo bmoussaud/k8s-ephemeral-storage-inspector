@@ -243,6 +243,11 @@ def inspect_gui():
     json_data = volumeManager.run()
     table = json2html.convert(json=json_data)
     print(table)
-    return render_template_string(
-        table
+    # return render_template_string(
+    #    table
+    # )
+    return render_template(
+        "inspect.html",
+        table=table,
+        date=datetime.now()
     )

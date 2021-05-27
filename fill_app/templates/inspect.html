@@ -3,12 +3,12 @@
 
 <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='site.css') }}" />
-    <title>Inspect</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>Inspect {{ date }}</title>
 </head>
 
 <body>
-    {{ table }}
+    {{ table |safe}}
 </body>
 
 </html>
