@@ -26,9 +26,7 @@ rules:
     resources:
       - pods/exec
     verbs:
-      - create
-      - get
-      - post
+      - '*'
 ---
 apiVersion: v1
 kind: ServiceAccount
