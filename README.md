@@ -6,9 +6,19 @@
 3. Expose: `kubectl -n inspector port-forward service/storage-inspector-svc 5000`
 4. Actions
 
+## vSphere with Tanzu
+
+REF: [Example Role Bindings for Pod Security Policy](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-4CCDBB85-2770-4FB8-BF0E-5146B45C9543.html)
+
+* Deploy `kubectl apply -f https://raw.githubusercontent.com/bmoussaud/k8s-ephemeral-storage-inspector/main/k8s/deploy_tkgs.yaml -n inspector`
+
+# Test
+
 * Fill: `curl http://localhost:5000/api/fill/5`
 * Inspect API `curl http://localhost:5000/api/inspect`
 * Inspect GUI [http://localhost:5000/inspect](http://localhost:5000/inspect)
+
+# Run
 
 ![Screen Shot](screenshot.png)
 
