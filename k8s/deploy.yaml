@@ -62,10 +62,10 @@ spec:
       labels:
         app: k8s-ephemeral-storage-inspector
     spec:
-      #serviceAccountName: storage-inspector-controller  
+      serviceAccountName: storage-inspector-controller  
       containers:
       - name: k8s-ephemeral-storage-inspector
-        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.2
+        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.3
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
@@ -76,6 +76,8 @@ spec:
             value: "/tmp/filler"
           - name: ENGINE
             value: K8S
+          - name: PORT
+            value: "5000"
         volumeMounts:
           - mountPath: /tmp/filler
             name: runner

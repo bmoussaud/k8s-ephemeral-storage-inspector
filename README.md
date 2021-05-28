@@ -28,3 +28,9 @@ In the screenshot of the app running on my machine
 * BLUE the pod that is eating the more storage is ‘web-deployment’ with a large file of 3.2G mounted on /tmp/mywebdata.
 
 
+# Build 
+using buildpack https://github.com/GoogleCloudPlatform/buildpacks
+
+````
+$make buildpack
+````
