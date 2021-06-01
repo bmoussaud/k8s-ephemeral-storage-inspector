@@ -67,7 +67,7 @@ class VolumeManager:
         for pod in pods_with_empty_dir_mounted_volumes:
             pod['command'] = "df -h {ephemeral_path}".format(**pod)
             pod['command_file'] = "ls -lh {ephemeral_path}".format(**pod)
-            pod['kubectl'] = "kubectl exec {pod} -n {namespace} -- {command}".format(
+            pod['kubectl'] = "kubectl exec {pod} -n {namespace} -c {container} -- {command}".format(
                 **pod)
 
         mesured_pods = self.execute(pods_with_empty_dir_mounted_volumes)
@@ -84,12 +84,12 @@ class VolumeManager:
             try:
 
                 # DF
-                print("DF")
-                # TODO : manage multiple containers in the pod.
+                print("DF")                
                 resp = stream(self._core_v1.connect_get_namespaced_pod_exec,
                               pod['pod'],
                               pod['namespace'],
                               command=pod['command'].split(),
+                              container=pod['container'],
                               stderr=True, stdin=False,
                               stdout=True, tty=False)
                 print("Response: " + resp)
@@ -102,6 +102,7 @@ class VolumeManager:
                                      pod['pod'],
                                      pod['namespace'],
                                      command=pod['command_file'].split(),
+                                     container=pod['container'],
                                      stderr=True, stdin=False,
                                      stdout=True, tty=False)
                     data_storage = {'storage-Filesystem': info[0], 'storage-1K-blocks': info[1], 'storage-Used': info[2],
