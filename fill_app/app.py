@@ -78,7 +78,7 @@ class VolumeManager:
         mesured_pods = []
         for pod in pods:
             data_storage = {'storage-Filesystem': 'NA', 'storage-1K-blocks': 'NA', 'storage-Used': 'NA',
-                            'storage-Available': 'NA', 'storage-used_percent': 'NA', 'storage-mounted': 'NA', 'storage-ls': 'NA'}
+                            'storage-Available': 'NA', 'storage-used_percent': 'NA', 'storage-ls': 'NA'}
             print("execute {pod}...{command}".format(**pod))
 
             try:
@@ -105,7 +105,7 @@ class VolumeManager:
                                      stderr=True, stdin=False,
                                      stdout=True, tty=False)
                     data_storage = {'storage-Filesystem': info[0], 'storage-1K-blocks': info[1], 'storage-Used': info[2],
-                                    'storage-Available': info[3], 'storage-used_percent': info[4], 'storage-mounted': info[5], 'storage-ls': resp_ls.splitlines()}
+                                    'storage-Available': info[3], 'storage-used_percent': info[4], 'storage-ls': resp_ls.splitlines()}
 
             except Exception as e:
                 print("ERROR execute {pod}...{command}".format(**pod))
