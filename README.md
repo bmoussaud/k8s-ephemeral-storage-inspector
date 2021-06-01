@@ -10,6 +10,7 @@
 
 REF: [Example Role Bindings for Pod Security Policy](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-tanzu/GUID-4CCDBB85-2770-4FB8-BF0E-5146B45C9543.html)
 
+* kubectl annotate ns alex alexellis.io/registry-creds.ignore=0 --overwrite
 * Deploy `kubectl apply -f https://raw.githubusercontent.com/bmoussaud/k8s-ephemeral-storage-inspector/main/k8s/deploy_tkgs.yaml -n inspector`
 
 # Test

@@ -46,3 +46,11 @@ apply_tkgs:
 
 delete:
 	kubectl delete -f k8s -n inspector
+
+vsphere-login:
+	kubectl vsphere login --server=172.17.12.128 --vsphere-username administrator@cpod-tanzu2.az-fkd.cloud-garage.net  --insecure-skip-tls-verify
+	kubectl config use-context 172.17.12.128
+
+cluster-login:
+	kubectl vsphere login --server 172.17.12.128 --vsphere-username administrator@cpod-tanzu2.az-fkd.cloud-garage.net --insecure-skip-tls-verify --tanzu-kubernetes-cluster-name dev01 --tanzu-kubernetes-cluster-namespace bmoussaud
+	kubectl config use-context dev01

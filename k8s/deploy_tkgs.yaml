@@ -32,32 +32,21 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: storage-inspector-controller    
+imagePullSecrets:
+  - name: myregistrykey
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: storage-inspector-admin-binding
 subjects:
-  - kind: ServiceAccount 
+  - kind: ServiceAccount
     name: storage-inspector-controller   
     namespace: inspector   
 roleRef:
   kind: ClusterRole
-  name: psp:vmware-system-privileged
+  name: storage-inspector-pod-manager
   apiGroup: rbac.authorization.k8s.io
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: storage-inspector-admin-binding-group  
-roleRef:
-  kind: ClusterRole
-  name: psp:vmware-system-restricted
-  apiGroup: rbac.authorization.k8s.io
-subjects:
-- kind: Group
-  apiGroup: rbac.authorization.k8s.io
-  name: system:serviceaccounts
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -78,8 +67,13 @@ spec:
       serviceAccountName: storage-inspector-controller  
       containers:
       - name: k8s-ephemeral-storage-inspector
-        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.2
+        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.3
         imagePullPolicy: Always
+        resources:
+          requests:
+            ephemeral-storage: "2Gi"
+          limits:
+            ephemeral-storage: "4Gi"
         ports:
         - containerPort: 5000
         env:
@@ -89,6 +83,8 @@ spec:
             value: "/tmp/filler"
           - name: ENGINE
             value: K8S
+          - name: PORT
+            value: "5000"
         volumeMounts:
           - mountPath: /tmp/filler
             name: runner
