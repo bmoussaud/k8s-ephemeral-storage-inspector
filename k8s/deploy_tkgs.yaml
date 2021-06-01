@@ -67,7 +67,7 @@ spec:
       serviceAccountName: storage-inspector-controller  
       containers:
       - name: k8s-ephemeral-storage-inspector
-        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.4
+        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.5
         imagePullPolicy: Always
         resources:
           requests:

@@ -60,7 +60,8 @@ class VolumeManager:
                 pod.obj['spec']['containers'], emptyDir)
             for v in results:
                 data = {'nodeName': pod.obj['spec']['nodeName'], 'namespace': pod.obj['metadata']['namespace'],   'pod': pod.obj['metadata']['name'], 'container': v,
-                        'ephemeral_path': results[v], }
+                        'ephemeral_path': results[v]['mountPath'], 'ephemeral-storage-requests': results[v]['ephemeral-storage-requests'], 'ephemeral-storage-limits': results[v]['ephemeral-storage-limits']}
+
                 pods_with_empty_dir_mounted_volumes.append(data)
 
         # pprint.pprint(pods_with_empty_dir_mounted_volumes)
@@ -84,7 +85,7 @@ class VolumeManager:
             try:
 
                 # DF
-                print("DF")                
+                print("DF")
                 resp = stream(self._core_v1.connect_get_namespaced_pod_exec,
                               pod['pod'],
                               pod['namespace'],
@@ -131,13 +132,26 @@ class VolumeManager:
         # print('containers_using')
         mountedVolumePaths = {}
         for container in containers:
-            # pprint.pprint(containers)
+            data = {}
+            print(f"===> inspect container {container['name']}")
+            pprint.pprint(containers)
             volumeMounts = container.get('volumeMounts', [])
             for mountedVolume in volumeMounts:
                 if mountedVolume['name'] == volume['name']:
                     # print(mountedVolume)
-                    mountedVolumePaths[container['name']
-                                       ] = mountedVolume['mountPath']
+                    data['mountPath'] = mountedVolume['mountPath']
+                    data['ephemeral-storage-limits'] = 'NA'
+                    data['ephemeral-storage-requests'] = 'NA'
+                    if 'resources' in container:
+                        if 'requests' in container['resources']:
+                            if 'ephemeral-storage' in container['resources']['requests']:
+                                data['ephemeral-storage-requests'] = container['resources']['requests']['ephemeral-storage']
+                        if 'limits' in container['resources']:
+                            if 'ephemeral-storage' in container['resources']['limits']:
+                                data['ephemeral-storage-limits'] = container['resources']['limits']['ephemeral-storage']
+
+                    container_name = container['name']
+                    mountedVolumePaths[container_name] = data
         return mountedVolumePaths
 
 
