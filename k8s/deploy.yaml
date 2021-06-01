@@ -65,7 +65,7 @@ spec:
       serviceAccountName: storage-inspector-controller  
       containers:
       - name: k8s-ephemeral-storage-inspector
-        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.3
+        image: bmoussaud/k8s-ephemeral-storage-inspector:0.0.4
         imagePullPolicy: Always
         ports:
         - containerPort: 5000

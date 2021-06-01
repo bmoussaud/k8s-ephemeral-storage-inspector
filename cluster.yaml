@@ -12,6 +12,6 @@ spec:
       class: best-effort-small
       storageClass: tanzu-storage-policy
     workers:
-      count: 1
+      count: 3
       class: best-effort-small
       storageClass: tanzu-storage-policy

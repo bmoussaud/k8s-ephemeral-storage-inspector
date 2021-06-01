@@ -8,6 +8,7 @@ import os
 import subprocess
 import pykube
 import pprint
+import traceback
 
 import operator
 from kubernetes import config
@@ -80,27 +81,38 @@ class VolumeManager:
                             'storage-Available': 'NA', 'storage-used_percent': 'NA', 'storage-mounted': 'NA', 'storage-ls': 'NA'}
             print("execute {pod}...{command}".format(**pod))
 
-            # DF
-            resp = stream(self._core_v1.connect_get_namespaced_pod_exec,
-                          pod['pod'],
-                          pod['namespace'],
-                          command=pod['command'].split(),
-                          stderr=True, stdin=False,
-                          stdout=True, tty=False)
-            print("Response: " + resp)
-            data = resp.splitlines()
-            if (len(data) > 0):
-                print("Response: " + data[1])
-                info = data[1].split()
+            try:
 
-                resp_ls = stream(self._core_v1.connect_get_namespaced_pod_exec,
-                                 pod['pod'],
-                                 pod['namespace'],
-                                 command=pod['command_file'].split(),
-                                 stderr=True, stdin=False,
-                                 stdout=True, tty=False)
-                data_storage = {'storage-Filesystem': info[0], 'storage-1K-blocks': info[1], 'storage-Used': info[2],
-                                'storage-Available': info[3], 'storage-used_percent': info[4], 'storage-mounted': info[5], 'storage-ls': resp_ls.splitlines()}
+                # DF
+                print("DF")
+                # TODO : manage multiple containers in the pod.
+                resp = stream(self._core_v1.connect_get_namespaced_pod_exec,
+                              pod['pod'],
+                              pod['namespace'],
+                              command=pod['command'].split(),
+                              stderr=True, stdin=False,
+                              stdout=True, tty=False)
+                print("Response: " + resp)
+                data = resp.splitlines()
+                if (len(data) > 0):
+                    print("Response: " + data[1])
+                    info = data[1].split()
+
+                    resp_ls = stream(self._core_v1.connect_get_namespaced_pod_exec,
+                                     pod['pod'],
+                                     pod['namespace'],
+                                     command=pod['command_file'].split(),
+                                     stderr=True, stdin=False,
+                                     stdout=True, tty=False)
+                    data_storage = {'storage-Filesystem': info[0], 'storage-1K-blocks': info[1], 'storage-Used': info[2],
+                                    'storage-Available': info[3], 'storage-used_percent': info[4], 'storage-mounted': info[5], 'storage-ls': resp_ls.splitlines()}
+
+            except Exception as e:
+                print("ERROR execute {pod}...{command}".format(**pod))
+                traceback.print_stack()
+                print("<<<<<")
+                data_storage['storage-ls'] = "Error executing the command in the pod : {0}".format(
+                    str(e))
 
             pod.update(data_storage)
             del pod['command']
@@ -119,7 +131,7 @@ class VolumeManager:
         mountedVolumePaths = {}
         for container in containers:
             # pprint.pprint(containers)
-            volumeMounts = container.get('volumeMounts', [])            
+            volumeMounts = container.get('volumeMounts', [])
             for mountedVolume in volumeMounts:
                 if mountedVolume['name'] == volume['name']:
                     # print(mountedVolume)

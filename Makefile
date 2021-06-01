@@ -1,5 +1,5 @@
 IMAGE_NAME=bmoussaud/k8s-ephemeral-storage-inspector
-IMAGE_VERSION=0.0.3
+IMAGE_VERSION=0.0.4
 IMAGE=$(IMAGE_NAME):$(IMAGE_VERSION)
 SOURCE_BRANCH=v0.0.1
 
@@ -42,6 +42,7 @@ apply_sample_app:
 	kubectl apply -f k8s/myapp.yaml -n inspector
 
 apply_tkgs:
+	kubectl delete -f k8s/deploy_tkgs.yaml -n inspector
 	kubectl apply -f k8s/deploy_tkgs.yaml -n inspector
 
 delete:
