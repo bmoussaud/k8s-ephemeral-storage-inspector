@@ -59,14 +59,14 @@ class VolumeManager:
             results = self.containers_using(
                 pod.obj['spec']['containers'], emptyDir)
             for v in results:
-                data = {'pod': pod.obj['metadata']['name'], 'container': v,
-                        'path': results[v], 'namespace': pod.obj['metadata']['namespace'], 'nodeName': pod.obj['spec']['nodeName']}
+                data = {'nodeName': pod.obj['spec']['nodeName'], 'namespace': pod.obj['metadata']['namespace'],   'pod': pod.obj['metadata']['name'], 'container': v,
+                        'ephemeral_path': results[v], }
                 pods_with_empty_dir_mounted_volumes.append(data)
 
         # pprint.pprint(pods_with_empty_dir_mounted_volumes)
         for pod in pods_with_empty_dir_mounted_volumes:
-            pod['command'] = "df -h {path}".format(**pod)
-            pod['command_file'] = "ls -lh {path}".format(**pod)
+            pod['command'] = "df -h {ephemeral_path}".format(**pod)
+            pod['command_file'] = "ls -lh {ephemeral_path}".format(**pod)
             pod['kubectl'] = "kubectl exec {pod} -n {namespace} -- {command}".format(
                 **pod)
 

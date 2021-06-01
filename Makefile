@@ -4,7 +4,7 @@ IMAGE=$(IMAGE_NAME):$(IMAGE_VERSION)
 SOURCE_BRANCH=v0.0.1
 
 local_run:
-	FLASK_APP=fill_app/app.py flask run
+	ENGINE=LOCAL FLASK_APP=fill_app/app.py flask run
 
 build:
 	docker build \
