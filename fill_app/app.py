@@ -41,6 +41,36 @@ class VolumeManager:
     def k8s_api(self):
         return self._api
 
+    def ephemeral(self):
+
+        pods = []
+
+        running_pods = pykube.Pod.objects(self.k8s_api()).filter(
+            namespace=pykube.query.all_,
+            field_selector={"status.phase": "Running"}
+        )
+        for pod in running_pods:
+            for container in pod.obj['spec']['containers']:
+                data = {'nodeName': pod.obj['spec']['nodeName'],
+                        'namespace': pod.obj['metadata']['namespace'],
+                        'pod': pod.obj['metadata']['name'],
+                        'container': container['name'],
+                        'ephemeral-storage-requests': '-',
+                        'ephemeral-storage-limits': '-'}
+
+                if 'resources' in container:
+                    if 'requests' in container['resources']:
+                        if 'ephemeral-storage' in container['resources']['requests']:
+                            data['ephemeral-storage-requests'] = container['resources']['requests']['ephemeral-storage']
+                    if 'limits' in container['resources']:
+                        if 'ephemeral-storage' in container['resources']['limits']:
+                            data['ephemeral-storage-limits'] = container['resources']['limits']['ephemeral-storage']
+
+                pods.append(data)
+
+        return sorted(pods,  key=lambda pod: pod['nodeName'])
+        #return pods
+
     def run(self):
 
         pods_with_empty_dir_mounted_volumes = []
@@ -159,6 +189,7 @@ class VolumeManager:
                     data['mountPath'] = mountedVolume['mountPath']
                     data['ephemeral-storage-limits'] = 'NA'
                     data['ephemeral-storage-requests'] = 'NA'
+
                     if 'resources' in container:
                         if 'requests' in container['resources']:
                             if 'ephemeral-storage' in container['resources']['requests']:
@@ -293,6 +324,37 @@ def inspect_gui():
     volumeManager = VolumeManager(config_file)
     json_data = volumeManager.run()
     table = json2html.convert(json=json_data)
+
+    return render_template(
+        "inspect.html",
+        table=table,
+        date=datetime.now()
+    )
+
+
+@app.route("/api/ephemeral")
+def ephemeral():
+    if os.environ['ENGINE'] == 'K8S':
+        config_file = 'K8S'
+    else:
+        config_file = "kubeconfig-aws-front.yml"
+
+    volumeManager = VolumeManager(config_file)
+    data = volumeManager.ephemeral()
+    return jsonify(data)
+
+
+@app.route("/ephemeral")
+def ephemeral_gui():
+    if os.environ['ENGINE'] == 'K8S':
+        config_file = 'K8S'
+    else:
+        config_file = "kubeconfig-aws-front.yml"
+
+    volumeManager = VolumeManager(config_file)
+
+    data = volumeManager.ephemeral()
+    table = json2html.convert(json=data)
 
     return render_template(
         "inspect.html",
