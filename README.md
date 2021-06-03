@@ -12,7 +12,7 @@
 * Inspect API `curl http://localhost:5000/api/inspect`
 * Inspect GUI [http://localhost:5000/inspect](http://localhost:5000/inspect)
 * Ephemeral API `curl http://localhost:5000/api/ephemeral`
-* Ephemeral GUI [http://localhost:5000/api/ephemeral](http://localhost:5000/api/ephemeral)
+* Ephemeral GUI [http://localhost:5000/ephemeral](http://localhost:5000/ephemeral)
 
 
 # Run
