@@ -53,14 +53,21 @@ class VolumeManager:
         for pod in running_pods:
             volumes = pod.obj['spec']['volumes']
             emptyDir = self._containsEmptyDir(volumes)
+
             if emptyDir is None:
                 continue
 
             results = self.containers_using(
                 pod.obj['spec']['containers'], emptyDir)
+
             for v in results:
-                data = {'nodeName': pod.obj['spec']['nodeName'], 'namespace': pod.obj['metadata']['namespace'],   'pod': pod.obj['metadata']['name'], 'container': v,
-                        'ephemeral_path': results[v]['mountPath'], 'ephemeral-storage-requests': results[v]['ephemeral-storage-requests'], 'ephemeral-storage-limits': results[v]['ephemeral-storage-limits']}
+                data = {'nodeName': pod.obj['spec']['nodeName'],
+                        'namespace': pod.obj['metadata']['namespace'],
+                        'pod': pod.obj['metadata']['name'],
+                        'container': v,
+                        'ephemeral_path': results[v]['mountPath'],
+                        'ephemeral-storage-requests': results[v]['ephemeral-storage-requests'],
+                        'ephemeral-storage-limits': results[v]['ephemeral-storage-limits']}
 
                 pods_with_empty_dir_mounted_volumes.append(data)
 
@@ -68,6 +75,7 @@ class VolumeManager:
         for pod in pods_with_empty_dir_mounted_volumes:
             pod['command'] = "df -h {ephemeral_path}".format(**pod)
             pod['command_file'] = "ls -lh {ephemeral_path}".format(**pod)
+            pod['command_du'] = "du -h {ephemeral_path}".format(**pod)
             pod['kubectl'] = "kubectl exec {pod} -n {namespace} -c {container} -- {command}".format(
                 **pod)
 
@@ -79,7 +87,7 @@ class VolumeManager:
         mesured_pods = []
         for pod in pods:
             data_storage = {'storage-Filesystem': 'NA', 'storage-1K-blocks': 'NA', 'storage-Used': 'NA',
-                            'storage-Available': 'NA', 'storage-used_percent': 'NA', 'storage-ls': 'NA'}
+                            'storage-Available': 'NA', 'storage-used_percent': 'NA', 'storage-ls': 'NA', 'storage-du': 'NA'}
             print("execute {pod}...{command}".format(**pod))
 
             try:
@@ -108,6 +116,14 @@ class VolumeManager:
                                      stdout=True, tty=False)
                     data_storage = {'storage-Filesystem': info[0], 'storage-1K-blocks': info[1], 'storage-Used': info[2],
                                     'storage-Available': info[3], 'storage-used_percent': info[4], 'storage-ls': resp_ls.splitlines()}
+                    resp_ls = stream(self._core_v1.connect_get_namespaced_pod_exec,
+                                     pod['pod'],
+                                     pod['namespace'],
+                                     command=pod['command_du'].split(),
+                                     container=pod['container'],
+                                     stderr=True, stdin=False,
+                                     stdout=True, tty=False)
+                    data_storage['storage-du'] = resp_ls.splitlines()
 
             except Exception as e:
                 print("ERROR execute {pod}...{command}".format(**pod))
@@ -119,6 +135,7 @@ class VolumeManager:
             pod.update(data_storage)
             del pod['command']
             del pod['command_file']
+            del pod['command_du']
             mesured_pods.append(pod)
         return mesured_pods
 
@@ -276,10 +293,7 @@ def inspect_gui():
     volumeManager = VolumeManager(config_file)
     json_data = volumeManager.run()
     table = json2html.convert(json=json_data)
-    # print(table)
-    # return render_template_string(
-    #    table
-    # )
+
     return render_template(
         "inspect.html",
         table=table,
