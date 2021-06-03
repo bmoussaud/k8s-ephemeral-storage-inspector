@@ -5,4 +5,4 @@ env/
 /__pycache__/
 /venv/
 /.pyenv/
-/.idea/
+/.idea/.DS_Store
